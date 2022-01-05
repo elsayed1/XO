@@ -1,56 +1,55 @@
 import React, { useState, useEffect } from "react";
-import { Button, StyleSheet, TouchableOpacity } from "react-native";
+import { Button, StyleSheet, TouchableOpacity,SafeAreaView } from "react-native";
 import io, { Socket } from "socket.io-client";
 
-import { Text, View, TextInput } from "../components/Themed";
+import { Text, TextInput } from "../components/Themed";
 import { RootStackScreenProps } from "../types";
-import Block from "../components/Block";
+import { Block } from "react-native-block-component";
 import { useThemeColor } from "../components/Themed";
-
 
 export default function Login({ navigation }: RootStackScreenProps<"Login">) {
   const backgroundColor = useThemeColor({}, "background");
-  const [playerName, setPlayerName] = useState<string>('');
-  const [roomName,setRoomName]=useState('')
+  const [playerName, setPlayerName] = useState<string>("");
+  const [roomName, setRoomName] = useState("");
   const [socket, setSocket] = useState<undefined | Socket>();
+
 
   useEffect(() => {
     const remote = "https://agile-everglades-10098.herokuapp.com/";
     const local = "http://192.168.1.54:3000/";
-
     const socketConn = io(local);
-    console.log(socketConn)
     setSocket(socketConn);
-  
+    
   }, []);
 
-useEffect(()=>{
-  socket?.on("connect", () => {
-    console.warn("connected");
-  });
-},[socket])
+  useEffect(() => {
+    socket?.on("connect", () => {
+      console.warn("connected");
+    });
+  },[socket])
+ 
 
   const createRoom = () => {
     socket?.emit("create room", playerName);
     socket?.on("room created", ({ roomName }) => {
-      navigation.navigate('Board', {
+      navigation.navigate("Board", {
         socket,
         roomName: roomName,
-        player1 :playerName
+        player1: playerName,
       });
     });
   };
-  
-   const joinRoom = () => {
-      socket?.emit("join room", { roomName, player2:playerName });
-      socket?.on("player2 joined", ({ player2, roomName }) => {
-        navigation.navigate("Board", {
-          socket,
-          player2,
-          roomName
-        });
+
+  const joinRoom = () => {
+    socket?.emit("join room", { roomName, player2: playerName });
+    socket?.on("player2 joined", ({ player2, roomName }) => {
+      navigation.navigate("Board", {
+        socket,
+        player2,
+        roomName,
       });
-    };
+    });
+  };
 
   return (
     <Block flex>
